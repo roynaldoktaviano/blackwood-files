@@ -146,7 +146,7 @@ button:focus-visible, a:focus-visible{ outline:2px dashed var(--gold); outline-o
 .dlg .text{ font-size:19px; line-height:1.5; margin:10px 0 0; min-height:4.5em; color:#ecdcbc; }
 .dlg .more{ position:absolute; right:4px; bottom:4px; color:var(--gold); font-size:14px; animation:bob 1.2s ease-in-out infinite; }
 @keyframes bob{ 50%{ transform:translateY(3px); } }
-.dlg-actions{ display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:6px; }
+.dlg-actions{ display:flex; justify-content:flex-end; align-items:center; gap:10px; margin-top:6px; }
 .skip{ background:none; border:none; color:var(--dim); font-family:var(--type); font-size:13px; text-decoration:underline; padding:4px 0; }
 
 /* ============ PETA ============ */
@@ -614,7 +614,6 @@ button:focus-visible, a:focus-visible{ outline:2px dashed var(--gold); outline-o
       <span class="more" id="dlg-more">▾ ketuk</span>
     </div>
     <div class="dlg-actions">
-      <button class="skip" id="dlg-skip">Lewati cerita</button>
       <button class="btn primary" id="to-map" hidden>Mulai penyelidikan</button>
     </div>
   </section>
@@ -649,7 +648,7 @@ button:focus-visible, a:focus-visible{ outline:2px dashed var(--gold); outline-o
   <!-- SURAT -->
   <section class="screen letter-wrap" id="s-letter" aria-label="Surat">
     <article class="letter grain">
-      <div class="reveal-head"><span>Isi brankas: satu lembar surat</span><button class="skip" id="skip-type">Tampilkan semua</button></div>
+      <div class="reveal-head"><span>Isi brankas: satu lembar surat</span></div>
       <div class="body" id="letter-body"></div>
       <div class="ask" id="ask">
         <p class="q" id="question"></p>
@@ -983,15 +982,14 @@ function showLine(i){
   let c = 0; el.textContent = "";
   typing = setInterval(() => { el.textContent = text.slice(0, ++c); if (c % 3 === 0 && text[c - 1] !== " ") SFX.blip(); if (c >= text.length){ clearInterval(typing); typing = null; lineDone(); } }, 26);
 }
-function lineDone(){ if (li === LINES.length - 1){ $("#dlg-more").hidden = true; $("#to-map").hidden = false; $("#dlg-skip").hidden = true; } }
-function startDialog(){ li = 0; $("#dlg-more").hidden = false; $("#to-map").hidden = true; $("#dlg-skip").hidden = false; showLine(0); }
+function lineDone(){ if (li === LINES.length - 1){ $("#dlg-more").hidden = true; $("#to-map").hidden = false; } }
+function startDialog(){ li = 0; $("#dlg-more").hidden = false; $("#to-map").hidden = true; showLine(0); }
 function advance(){
   if (typing){ clearInterval(typing); typing = null; $("#dlg-text").textContent = full; return lineDone(); }
   if (li < LINES.length - 1){ li++; showLine(li); }
 }
 $("#dlg").addEventListener("click", () => { SFX.click(); advance(); });
 $("#dlg").addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " "){ e.preventDefault(); advance(); } });
-$("#dlg-skip").addEventListener("click", () => { clearInterval(typing); typing = null; li = LINES.length - 1; showLine(li); $("#dlg-text").textContent = full; clearInterval(typing); typing = null; lineDone(); });
 $("#to-map").addEventListener("click", () => { SFX.paper(); go("s-map"); });
 
 /* --- peta kota --- */
@@ -1305,14 +1303,14 @@ function buildLetterEls(){ const body = $("#letter-body"); body.innerHTML = ""; 
 function showLetterInstant(){
   clearTimeout(typingTimer);
   buildLetterEls().forEach((p, i) => p.textContent = CONFIG.surat[i]);
-  $("#question").textContent = CONFIG.pertanyaan; $("#ask").classList.add("on"); $("#skip-type").hidden = true; typed = true; SFX.musicOn();
+  $("#question").textContent = CONFIG.pertanyaan; $("#ask").classList.add("on"); typed = true; SFX.musicOn();
 }
 function typeLetter(){
   if (typed || reduceMotion) return showLetterInstant();
   const ps = buildLetterEls(); $("#question").textContent = CONFIG.pertanyaan;
   let pi = 0, ci = 0; const caret = document.createElement("span"); caret.className = "caret";
   (function tick(){
-    if (pi >= ps.length){ caret.remove(); $("#ask").classList.add("on"); $("#skip-type").hidden = true; typed = true; SFX.musicOn(); return; }
+    if (pi >= ps.length){ caret.remove(); $("#ask").classList.add("on"); typed = true; SFX.musicOn(); return; }
     const txt = CONFIG.surat[pi]; ps[pi].textContent = txt.slice(0, ++ci); ps[pi].appendChild(caret);
     let delay = 28 + Math.random() * 30; const ch = txt[ci - 1]; if (ch !== " ") SFX.key();
     if (ch === ",") delay += 160; if (ch === "." || ch === ":") delay += 380;
@@ -1320,7 +1318,6 @@ function typeLetter(){
     typingTimer = setTimeout(tick, delay);
   })();
 }
-$("#skip-type").addEventListener("click", showLetterInstant);
 $$("[data-reread]").forEach(b => b.addEventListener("click", () => { go("s-letter"); showLetterInstant(); }));
 
 /* --- jawaban --- */
