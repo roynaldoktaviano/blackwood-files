@@ -289,10 +289,11 @@ button:focus-visible, a:focus-visible{ outline:2px dashed var(--gold); outline-o
 .shelf{ display:flex; align-items:flex-end; justify-content:center; gap:5px; padding:18px 10px 0; min-height:230px;
   background:linear-gradient(180deg,#120c08,#24180f); border-bottom:14px solid #4a3222; box-shadow:inset 0 10px 20px rgba(0,0,0,.6); }
 .book{ flex:1 1 0; max-width:56px; border:none; border-radius:3px 3px 0 0; color:#f1e3c4; font-family:var(--serif); font-weight:700; font-size:17px;
-  writing-mode:vertical-rl; transform:rotate(180deg); padding:12px 0; display:flex; align-items:center; justify-content:center;
+  padding:12px 0; display:flex; align-items:center; justify-content:center;
   box-shadow:inset -4px 0 0 rgba(0,0,0,.28), inset 3px 0 0 rgba(255,255,255,.08); transition:transform .2s ease, box-shadow .2s ease; position:relative; }
-.book::after{ content:""; position:absolute; left:0; right:0; bottom:16%; height:3px; background:rgba(230,200,140,.55); }
-.book.sel{ transform:rotate(180deg) translateY(14px); box-shadow:inset -4px 0 0 rgba(0,0,0,.28), 0 0 0 2px var(--gold); }
+.book span{ display:block; white-space:nowrap; writing-mode:vertical-rl; -webkit-writing-mode:vertical-rl; transform:rotate(180deg); }
+.book::after{ content:""; position:absolute; left:0; right:0; top:14%; height:3px; background:rgba(230,200,140,.55); }
+.book.sel{ transform:translateY(-14px); box-shadow:inset -4px 0 0 rgba(0,0,0,.28), 0 0 0 2px var(--gold); }
 
 .wax-wrap{ text-align:center; margin-bottom:14px; }
 .wax{ width:min(260px,90%); height:auto; }
@@ -832,19 +833,37 @@ const SFX = (() => {
   let ctx = null, out = null, nbuf = null, rain = null, music = null;
   let muted = false;
   try { muted = localStorage.getItem("bw-muted") === "1"; } catch (e) {}
+  let unlockEl = null;
+  function unlockMobile(){
+    // iPhone: paksa audio jalan walau tombol senyap aktif
+    try { if (navigator.audioSession) navigator.audioSession.type = "playback"; } catch (e) {}
+    if (!unlockEl){
+      try {
+        unlockEl = document.createElement("audio");
+        unlockEl.src = "data:audio/wav;base64,UklGRsQPAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YaAPAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA";
+        unlockEl.loop = true; unlockEl.setAttribute("playsinline", ""); unlockEl.volume = 0.01;
+        const pr = unlockEl.play(); if (pr && pr.catch) pr.catch(() => {});
+      } catch (e) {}
+    }
+  }
   function init(){
-    if (ctx) { ctx.resume && ctx.resume(); return ctx; }
+    unlockMobile();
+    if (ctx) { if (ctx.state !== "running" && ctx.resume) ctx.resume(); return ctx; }
     try {
       ctx = new (window.AudioContext || window.webkitAudioContext)();
       out = ctx.createGain(); out.gain.value = muted ? 0 : .9; out.connect(ctx.destination);
+      if (ctx.state !== "running" && ctx.resume) ctx.resume();
+      // nada hening untuk "membangunkan" audio di Safari
+      const o = ctx.createOscillator(), g = ctx.createGain(); g.gain.value = 0; o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + .05);
       nbuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
       const d = nbuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
     } catch (e) { ctx = null; }
     return ctx;
   }
   const T = () => ctx.currentTime;
+  function wake(){ if (ctx && ctx.state !== "running" && ctx.resume) ctx.resume(); }
   function tone(f, dur, { type = "sine", vol = .15, at = 0, to = null, attack = .005 } = {}){
-    if (!ctx) return; const t = T() + at;
+    if (!ctx) return; wake(); const t = T() + at;
     const o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.setValueAtTime(f, t); if (to) o.frequency.exponentialRampToValueAtTime(to, t + dur);
     g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + attack); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
@@ -901,6 +920,9 @@ const SFX = (() => {
     get muted(){ return muted; },
     toggle(){ muted = !muted; try { localStorage.setItem("bw-muted", muted ? "1" : "0"); } catch (e) {} if (out) out.gain.setTargetAtTime(muted ? 0 : .9, T(), .05); return muted; }
   };
+  // sentuhan pertama di mana pun membuka audio; kembali aktif saat tab dibuka lagi
+  ["pointerdown", "touchend", "click", "keydown"].forEach(ev => document.addEventListener(ev, () => init(), { passive:true }));
+  document.addEventListener("visibilitychange", () => { if (!document.hidden && ctx) { wake(); if (unlockEl && unlockEl.paused) unlockEl.play().catch(() => {}); } });
   return S;
 })();
 
@@ -1079,7 +1101,7 @@ const CHALLENGES = [
         order.forEach((bi, pos) => {
           const [t, c, h] = books[bi];
           const b = document.createElement("button"); b.className = "book" + (sel === pos ? " sel" : "");
-          b.style.background = c; b.style.height = `${h}px`; b.textContent = t;
+          b.style.background = c; b.style.height = `${h}px`; b.innerHTML = `<span>${t}</span>`;
           b.addEventListener("click", () => {
             if (locked) return;
             if (sel === null){ sel = pos; SFX.pick(); return draw(); }
